@@ -40,9 +40,9 @@ def create_app():
     # Configuramos la API Flask-RESTX, que nos ayuda a crear endpoints RESTful con documentación Swagger integrada
     api = Api(
         app,  # La aplicación Flask en la que registramos la API
-        title='API de Usuarios y Tareas',  # Título para la documentación Swagger
+        title='API de Usuarios y Hábitos',  # Título para la documentación Swagger
         version='1.0',  # Versión de la API
-        description='API para gestión de hábitos, usuarios asignaciones y logros ',  # Descripción de la API
+        description='API para gestión de hábitos, usuarios, asignaciones y logros ',  # Descripción de la API
         authorizations=authorizations,  # Añadimos la configuración de JWT a la API
         security='Bearer'  # Define que los endpoints por defecto usan el esquema de seguridad JWT
     )
