@@ -28,6 +28,7 @@ class User(db.Model):
     user_password = db.Column(db.String(200), nullable=False)  # Contraseña encriptada del usuario, no puede ser nula
     user_status = db.Column(db.Boolean, default=True, nullable=False)  # Estado del usuario, por defecto es activo
     user_created_date = db.Column(db.DateTime, nullable=False)  # Fecha de creación del usuario, no puede ser nula
+    #assignments = db.relationship('Assignment', backref='user', lazy=True) # Relación con la tabla assignments
 
     def __init__(self, first_name, last_name, username, email, user_password, user_status, user_created_date):
         """

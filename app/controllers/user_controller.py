@@ -5,7 +5,7 @@ from app.services.user_service import UserService
 # Crear un espacio de nombres (namespace) para los usuarios
 user_ns = Namespace('users', description='Operaciones relacionadas con los usuarios')
 
-# Modelo de entrada de usuario para la documentación de Swagger
+# Modelo de entrada de usuario
 user_model = user_ns.model('User', {
     'first_name': fields.String(required=True, description='Nombre de usuario'),
     'last_name': fields.String(required=True, description='Apellido de usuario'),
