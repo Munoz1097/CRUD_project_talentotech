@@ -1,4 +1,6 @@
 from app import db
+from datetime import datetime
+
 
 class User(db.Model):
     """
@@ -27,10 +29,10 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)  # Correo electrónico del usuario, debe ser único y no nulo
     user_password = db.Column(db.String(200), nullable=False)  # Contraseña encriptada del usuario, no puede ser nula
     user_status = db.Column(db.Boolean, default=True, nullable=False)  # Estado del usuario, por defecto es activo
-    user_created_date = db.Column(db.DateTime, nullable=False)  # Fecha de creación del usuario, no puede ser nula
+    user_created_date = db.Column(db.DateTime, default=datetime.now(), nullable=False)  # Fecha de creación del usuario, no puede ser nula
     assignments = db.relationship('Assignment', backref='user', lazy=True) # Relación con la tabla assignments
 
-    def __init__(self, first_name, last_name, nickname, email, user_password, user_status, user_created_date):
+    def __init__(self, first_name, last_name, nickname, email, user_password):
         """
         Constructor de la clase User.
 
@@ -48,5 +50,3 @@ class User(db.Model):
         self.nickname = nickname
         self.email = email
         self.user_password = user_password
-        self.user_status = user_status
-        self.user_created_date = user_created_date

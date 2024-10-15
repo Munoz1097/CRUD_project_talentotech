@@ -1,6 +1,5 @@
 from app import db, bcrypt
 from app.models.user_model import User
-from datetime import datetime
 
 
 class UserService:
@@ -19,14 +18,23 @@ class UserService:
         Returns:
             User: El usuario creado.
         """
+        # Realizando consultas para validar si el nickname o el email ya existen en la BD
+        nickname_validation = User.query.filter_by(nickname=nickname).first()
+        email_validation = User.query.filter_by(email=email).first()        
+
+        # Verificando que el el campo nickname no se repita
+        if nickname_validation:
+            raise ValueError({'Error':'Nickname already exists. Please choose a different one.'})
+        
+        # Verificando que el el campo email no se repita
+        if email_validation:
+            raise ValueError('Email is already registered. Please use a different email address.')
+
         # Generar un hash seguro de la contraseña con bcrypt
         hashed_password = bcrypt.generate_password_hash(user_password).decode('utf-8')
 
-        # Guarda la fecha actual en la variable created_date para asignarla a la fecha de creación del usuario
-        created_date = datetime.now()
-
         # Crear un nuevo objeto User con la contraseña hasheada y todos los demás datos necesarios
-        user = User(first_name, last_name, nickname, email, user_password=hashed_password, user_status=True, user_created_date=created_date)
+        user = User(first_name, last_name, nickname, email, user_password=hashed_password)
 
         # Añadir el nuevo usuario a la base de datos
         db.session.add(user)
