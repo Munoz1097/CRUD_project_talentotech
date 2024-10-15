@@ -5,14 +5,14 @@ from datetime import datetime
 
 class UserService:
     @staticmethod
-    def create_user(first_name, last_name, username, email, user_password):
+    def create_user(first_name, last_name, nickname, email, user_password):
         """
         Crear un nuevo usuario en el sistema.
 
         Args:
             first_name (str): El nombre del usuario.
             last_name (str): El apellido del usuario.
-            username (str): Nombre de usuario del nuevo usuario.
+            nickname (str): Nombre de usuario del nuevo usuario.
             email (str): Correo electrónico del nuevo usuario.
             user_password (str): Contraseña en texto plano que será encriptada.
 
@@ -26,7 +26,7 @@ class UserService:
         created_date = datetime.now()
 
         # Crear un nuevo objeto User con la contraseña hasheada y todos los demás datos necesarios
-        user = User(first_name, last_name, username, email, user_password=hashed_password, user_status=True, user_created_date=created_date)
+        user = User(first_name, last_name, nickname, email, user_password=hashed_password, user_status=True, user_created_date=created_date)
 
         # Añadir el nuevo usuario a la base de datos
         db.session.add(user)
@@ -66,7 +66,7 @@ class UserService:
 
         Args:
             user_id (int): ID del usuario a actualizar.
-            new_data (dict): Diccionario con los nuevos datos, como 'first_name', 'last_name', 'username', 'email', o 'user_password'.
+            new_data (dict): Diccionario con los nuevos datos, como 'first_name', 'last_name', 'nickname', 'email', o 'user_password'.
 
         Returns:
             None
@@ -88,9 +88,9 @@ class UserService:
         if 'last_name' in new_data:
             user.last_name = new_data['last_name']
 
-        # Si se proporciona un nuevo username, asigna el nuevo username
-        if 'username' in new_data:
-            user.username = new_data['username']
+        # Si se proporciona un nuevo nickname, asigna el nuevo nickname
+        if 'nickname' in new_data:
+            user.nickname = new_data['nickname']
 
         # Si se proporciona un nuevo email, asigna el nuevo email
         if 'email' in new_data:

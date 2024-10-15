@@ -49,15 +49,15 @@ def create_app():
 
     # Importamos los controladores y namespaces que organizan las rutas/endpoints de la API
     from .controllers.user_controller import user_ns  # Controlador para la gestión de usuarios
-    from .controllers.habit_controller import habit_ns
-    from .controllers.assignment_controller import assignment_ns
-    from .controllers.completed_date_controller import completed_date_ns
+    from .controllers.habit_controller import habit_ns # Controlador para la gestión de hábitos
+    from .controllers.assignment_controller import assignment_ns # Controlador para la gestión de asignaciones de hábitos por cada usuario
+    from .controllers.completed_date_controller import completed_date_ns # Controlador para la gestión de fechas en que se completan los hábitos
 
     # Registramos cada namespace (grupo de rutas) en la API
     api.add_namespace(user_ns, path='/users')  # Registrar el namespace de usuarios en /users
-    api.add_namespace(habit_ns, path='/habits')
-    api.add_namespace(assignment_ns, path='/assignments')
-    api.add_namespace(completed_date_ns, path='/completed_dates')
+    api.add_namespace(habit_ns, path='/habits') # Registrar el namespace de hábitos en /habits
+    api.add_namespace(assignment_ns, path='/assignments') # Registrar el namespace de asignaciones de hábitos por cada usuario en /assignment
+    api.add_namespace(completed_date_ns, path='/completed_dates') # Registrar el namespace de fechas en que se completan los hábitos en /completed_dates
 
     # Retornamos la aplicación ya configurada
     return app
