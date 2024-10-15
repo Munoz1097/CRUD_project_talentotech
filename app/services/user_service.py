@@ -24,7 +24,7 @@ class UserService:
 
         # Verificando que el el campo nickname no se repita
         if nickname_validation:
-            raise ValueError({'Error':'Nickname already exists. Please choose a different one.'})
+            raise ValueError('Nickname already exists. Please choose a different one.')
         
         # Verificando que el el campo email no se repita
         if email_validation:
