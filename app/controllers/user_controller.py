@@ -9,7 +9,7 @@ user_ns = Namespace('users', description='Operaciones relacionadas con los usuar
 user_model = user_ns.model('User', {
     'first_name': fields.String(required=True, description='Nombre de usuario'),
     'last_name': fields.String(required=True, description='Apellido de usuario'),
-    'nick': fields.String(required=True, description='Apodo de usuario'),
+    'nickname': fields.String(required=True, description='Apodo de usuario'),
     'email': fields.String(required=True, description='Email de usuario'),
     'user_password': fields.String(required=True, description='Contraseña'),
 })
@@ -19,7 +19,7 @@ user_response_model = user_ns.model('UserResponse', {
     'user_id': fields.Integer(description='ID de usuario'),
     'first_name': fields.String(description='Nombre de usuario'),
     'last_name': fields.String(description='Apellido de usuario'),
-    'nick': fields.String(description='Apodo de usuario'),
+    'nickname': fields.String(description='Apodo de usuario'),
     'email': fields.String(description='Email de usuario'),
     'user_status': fields.Boolean(description='Estado del usuario (activo o inactivo)'),
     'user_created_date': fields.DateTime(description='Fecha y hora de creación del usuario')
@@ -36,12 +36,12 @@ class UserResource(Resource):
         Este método permite obtener una lista de todos los usuarios registrados en la base de datos.
 
         Responses:
-        - 200: Retorna una lista de nombres de usuarios.
+        - 200: Retorna una lista de apodos de usuarios.
         """
         # Llama al servicio para obtener todos los usuarios
         users = UserService.get_all_users()  
         # Usamos jsonify para garantizar que la lista de usuarios se retorne como un JSON válido.
-        return jsonify({'users': [user.nick for user in users]})  # Retorna solo los nombres de usuario
+        return jsonify({'users': [user.nickname for user in users]})  # Retorna solo los apodos de usuario
     
     @user_ns.doc('create_user')
     @user_ns.expect(user_model, validate=True)  # Decorador para esperar el modelo en la petición
@@ -59,7 +59,7 @@ class UserResource(Resource):
         Body Parameters:
         - first_name: Nombre del usuario a crear. 
         - last_name: Apellido del usuario.
-        - nick: Apodo del usuario.
+        - nickname: Apodo del usuario.
         - email: Correo electronico del usuario.
         - user_password: Contraseña del usuario.
 
@@ -70,9 +70,9 @@ class UserResource(Resource):
         # Obtiene los datos en formato JSON del cuerpo de la solicitud
         data = request.get_json()
         # Se llama al metodo create_user de la clase UserService para crear un nuevo objeto User y se guarda en la variable user
-        user = UserService.create_user(data['first_name'], data['last_name'], data['nick'], data['email'], data['user_password'])
+        user = UserService.create_user(data['first_name'], data['last_name'], data['nickname'], data['email'], data['user_password'])
         # Usamos jsonify para asegurarnos de que la respuesta siga el formato JSON válido.
-        return jsonify({'message': 'User created successfully', 'user': user.nick})
+        return jsonify({'message': 'User created successfully', 'user': user.nickname})
     
 
 @user_ns.route('/<int:user_id>')
@@ -125,7 +125,7 @@ class UserDetailResource(Resource):
         Body Parameters:
         - first_name: Nuevo nombre del usuario (opcional).
         - last_name: Nuevo apellido del usuario (opcional).
-        - nick: El nuevo nombre de usuario (opcional).
+        - nickname: El nuevo apodo de usuario (opcional).
         - email: El nuevo Email del usuario (opcional).
         - user_password: La nueva contraseña (opcional).
 

@@ -12,7 +12,7 @@ class UserService:
         Args:
             first_name (str): El nombre del usuario.
             last_name (str): El apellido del usuario.
-            nickname (str): Nombre de usuario del nuevo usuario.
+            nickname (str): Apodo del nuevo usuario.
             email (str): Correo electrónico del nuevo usuario.
             user_password (str): Contraseña en texto plano que será encriptada.
 
