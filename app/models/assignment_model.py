@@ -10,6 +10,8 @@ class Assignment(db.Model):
     assignment_status = db.Column(db.Boolean, default=True, nullable=False)
     fk_user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     fk_habit_id = db.Column(db.Integer, db.ForeignKey('habits.habit_id'), nullable=False)
+    completed_dates = db.relationship('CompletedDate', backref='assignment', lazy=True)  # Relación con la tabla 'assignments'
+
 
     def __init__(self, fk_user_id, fk_habit_id):
 

@@ -38,7 +38,8 @@ class UserResource(Resource):
         Responses:
         - 200: Retorna una lista de nombres de usuarios.
         """
-        users = UserService.get_all_users()  # Llama al servicio para obtener todos los usuarios
+        # Llama al servicio para obtener todos los usuarios
+        users = UserService.get_all_users()  
         # Usamos jsonify para garantizar que la lista de usuarios se retorne como un JSON válido.
         return jsonify({'users': [user.username for user in users]})  # Retorna solo los nombres de usuario
     
@@ -66,7 +67,9 @@ class UserResource(Resource):
         - 201: Usuario creado con éxito.
         - 400: Si ocurre un error durante la creación del usuario.
         """
-        data = request.get_json()  # Obtiene los datos en formato JSON del cuerpo de la solicitud
+        # Obtiene los datos en formato JSON del cuerpo de la solicitud
+        data = request.get_json()
+        # Se llama al metodo create_user de la clase UserService para crear un nuevo objeto User y se guarda en la variable user
         user = UserService.create_user(data['first_name'], data['last_name'], data['username'], data['email'], data['user_password'])
         # Usamos jsonify para asegurarnos de que la respuesta siga el formato JSON válido.
         return jsonify({'message': 'User created successfully', 'user': user.username})
