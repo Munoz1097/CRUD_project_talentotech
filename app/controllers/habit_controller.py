@@ -65,7 +65,7 @@ class HabitResource(Resource):
             return jsonify({'message': f"Invalid value for 'time_of_day'. Allowed values are: {', '.join(TIME_OF_DAY_VALUES)}"}), 400
         
         new_habit = HabitService.create_habit(data['habit_name'], time_of_day)  # Crear el nuevo hábito
-        return new_habit, 201  # Retornar el nuevo hábito creado
+        return jsonify({'message': 'Habit created successfully', 'habit_name': new_habit.habit_name}) # Retornar el nuevo hábito creado
 
 @habit_ns.route('/<int:habit_id>')
 @habit_ns.param('habit_id', 'ID del hábito')

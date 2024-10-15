@@ -50,12 +50,13 @@ def create_app():
     # Importamos los controladores y namespaces que organizan las rutas/endpoints de la API
     from .controllers.user_controller import user_ns  # Controlador para la gestión de usuarios
     from .controllers.habit_controller import habit_ns
+    from .controllers.assignment_controller import assignment_ns
 
 
     # Registramos cada namespace (grupo de rutas) en la API
     api.add_namespace(user_ns, path='/users')  # Registrar el namespace de usuarios en /users
     api.add_namespace(habit_ns, path='/habits')
-
+    api.add_namespace(assignment_ns, path='/assignments')
 
     # Retornamos la aplicación ya configurada
     return app
