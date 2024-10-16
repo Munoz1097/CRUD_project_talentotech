@@ -1,5 +1,5 @@
-from flask import request, jsonify
-from flask_restx import Namespace, Resource, fields
+from flask import request, jsonify, make_response
+from flask_restx import Namespace, Resource, fields, marshal
 from app.services.user_service import UserService
 
 # Crear un espacio de nombres (namespace) para los usuarios
@@ -31,7 +31,7 @@ class UserResource(Resource):
     @user_ns.doc('get_all_users')
     def get(self):
         """
-        Obtener todos los usuarios
+        Obtener todos los usuarios con sus datos
         ---
         Este método permite obtener una lista de todos los usuarios registrados en la base de datos.
 
@@ -40,8 +40,8 @@ class UserResource(Resource):
         """
         # Llama al servicio para obtener todos los usuarios
         users = UserService.get_all_users()  
-        # Usamos jsonify para garantizar que la lista de usuarios se retorne como un JSON válido.
-        return jsonify({'users': [user.nickname for user in users]})  # Retorna solo los apodos de usuario
+        # Usamos marshal para garantizar que la lista de usuarios se retorne conforme al modelo user_response_model.
+        return marshal(users, user_response_model), 200 # Retorna todos los datos de los usuarios    
     
     @user_ns.doc('create_user')
     @user_ns.expect(user_model, validate=True)  # Decorador para esperar el modelo en la petición
@@ -65,21 +65,23 @@ class UserResource(Resource):
 
         Responses:
         - 201: Usuario creado con éxito.
-        - 400: Si ocurre un error durante la creación del usuario.
+        - 422: Si el nickname o el email ya existen.
         """
         # Obtiene los datos en formato JSON del cuerpo de la solicitud
         data = request.get_json()
-        # Se llama al metodo create_user de la clase UserService para crear un nuevo objeto User y se guarda en la variable user
-        user = UserService.create_user(data['first_name'], data['last_name'], data['nickname'], data['email'], data['user_password'])
-        # Usamos jsonify para asegurarnos de que la respuesta siga el formato JSON válido.
-        return jsonify({'message': 'User created successfully', 'user': user.nickname})
-    
+        try:
+            # Se llama al metodo create_user de la clase UserService para crear un nuevo objeto User y se guarda en la variable user
+            user = UserService.create_user(data['first_name'], data['last_name'], data['nickname'], data['email'], data['user_password'])  
+            # Se fabrica la respuesta con su respectivo código de respuesta
+            return make_response(jsonify({'message': 'User created successfully', 'user': user.nickname}), 201)
+        except ValueError as e:
+            # Si el nickname o el email ya existen se responde un mensaje de error con el 422
+            return make_response(jsonify({'message': str(e)}), 422)   
 
 @user_ns.route('/<int:user_id>')
 @user_ns.param('user_id', 'ID del usuario')
 class UserDetailResource(Resource):
     @user_ns.doc('get_user_by_user_id')
-    @user_ns.marshal_with(user_response_model, code=200)  # Decorador para estipular el formato de la respuesta
     def get(self, user_id):
         """
         Obtener datos de usuario
@@ -90,8 +92,14 @@ class UserDetailResource(Resource):
         - 200: Retorna un JSON con todos los datos del usuario.
         - 404: Si el usuario no es encontrado.
         """
-        user = UserService.get_user_by_user_id(user_id)  # Llama al servicio para obtener el usuario asociado al ID
-        return user  # Retorna todos los datos del usuario en el formato estipulado (user_response_model)
+        try:
+            # Llama al servicio para obtener el usuario asociado al ID
+            user = UserService.get_user_by_user_id(user_id)            
+            # Si el usuario se encuentra, aplicamos manualmente marshal para formatear la respuesta
+            return marshal(user, user_response_model), 200
+        except ValueError as e:
+            # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
+            return make_response(jsonify({'message': str(e)}), 404)
 
     @user_ns.doc('delete_user')
     def delete(self, user_id):
@@ -107,9 +115,14 @@ class UserDetailResource(Resource):
         - 200: Usuario eliminado con éxito.
         - 404: Si el usuario no se encuentra.
         """
-        UserService.delete_user(user_id)  # Llama al servicio para eliminar al usuario
-        # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
-        return jsonify({'message': 'User deleted successfully'})
+        try:
+            # Llama al servicio para eliminar al usuario
+            UserService.delete_user(user_id)  
+            # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
+            return jsonify({'message': 'User deleted successfully'})
+        except ValueError as e:
+            # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
+            return make_response(jsonify({'message': str(e)}), 404)
 
     @user_ns.doc('update_user')
     @user_ns.expect(user_model, validate=False)
@@ -133,7 +146,13 @@ class UserDetailResource(Resource):
         - 200: Usuario actualizado con éxito.
         - 404: Si el usuario no se encuentra.
         """
-        new_data = request.get_json()  # Obtiene los nuevos datos para la actualización
-        UserService.update_user(user_id, new_data)  # Llama al servicio para actualizar el usuario
-        # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
-        return jsonify({'message': 'User updated successfully'})
+        # Obtiene los nuevos datos para la actualización
+        new_data = request.get_json()  
+        try:
+            # Llama al servicio para actualizar el usuario
+            UserService.update_user(user_id, new_data)  
+            # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
+            return jsonify({'message': 'User updated successfully'})
+        except ValueError as e:
+            # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
+            return make_response(jsonify({'message': str(e)}), 404)

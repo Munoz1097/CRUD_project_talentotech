@@ -37,7 +37,7 @@ class HabitResource(Resource):
         - 200: Retorna una lista de todos los hábitos.
         """
         habits = HabitService.get_all_habits()  # Llama al servicio para obtener todos los hábitos
-        return habits  # Retorna todos los hábitos en el formato estipulado
+        return jsonify([{'habit_name': habit.habit_name, 'time_of_day': habit.time_of_day} for habit in habits]) # Retorna todos los hábitos en el formato estipulado
 
     @habit_ns.doc('create_habit')
     @habit_ns.expect(habit_model, validate=True)  # Decorador para esperar el modelo en la petición

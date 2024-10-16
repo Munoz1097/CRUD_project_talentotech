@@ -1,7 +1,6 @@
 from app import db, bcrypt
 from app.models.user_model import User
 
-
 class UserService:
     @staticmethod
     def create_user(first_name, last_name, nickname, email, user_password):
@@ -17,29 +16,24 @@ class UserService:
 
         Returns:
             User: El usuario creado.
+            ValueError: Si el nickname o el email ya existen en la base de datos
         """
         # Realizando consultas para validar si el nickname o el email ya existen en la BD
         nickname_validation = User.query.filter_by(nickname=nickname).first()
-        email_validation = User.query.filter_by(email=email).first()        
-
+        email_validation = User.query.filter_by(email=email).first()
         # Verificando que el el campo nickname no se repita
         if nickname_validation:
-            raise ValueError('Nickname already exists. Please choose a different one.')
-        
+            raise ValueError('Nickname already exists. Please choose a different one.')        
         # Verificando que el el campo email no se repita
         if email_validation:
             raise ValueError('Email is already registered. Please use a different email address.')
-
         # Generar un hash seguro de la contraseña con bcrypt
         hashed_password = bcrypt.generate_password_hash(user_password).decode('utf-8')
-
         # Crear un nuevo objeto User con la contraseña hasheada y todos los demás datos necesarios
         user = User(first_name, last_name, nickname, email, user_password=hashed_password)
-
         # Añadir el nuevo usuario a la base de datos
         db.session.add(user)
         db.session.commit()
-
         return user  # Retornar el usuario recién creado
 
     @staticmethod
@@ -62,10 +56,14 @@ class UserService:
             user_id (int): ID del usuario a buscar.
 
         Returns:
-            User: El usuario encontrado o None si no existe.
+            User: retorna el usuario.
+            ValueError: User not found, si el usuario no existe.
         """
         # Filtrar usuarios por su id de usuario (user_id)
-        return User.query.filter_by(user_id=user_id).first()
+        user = User.query.filter_by(user_id=user_id).first()
+        # Se llama al servicio de validacion para corroborar que el usuario exista
+        user_validated = UserService.user_validation(user)
+        return user_validated
 
     @staticmethod
     def update_user(user_id, new_data):
@@ -78,36 +76,24 @@ class UserService:
 
         Returns:
             None
-
-        Raises:
-            ValueError: Si el usuario no es encontrado.
         """
         # Buscar al usuario por su id
         user = UserService.get_user_by_user_id(user_id)
-        if not user:
-            # Si no se encuentra el usuario, lanzar una excepción
-            raise ValueError('User not found')
-
         # Si se proporciona un nuevo first_name, asigna el nuevo first_name
         if 'first_name' in new_data:
             user.first_name = new_data['first_name']
-
         # Si se proporciona un nuevo last_name, asigna el nuevo last_name
         if 'last_name' in new_data:
             user.last_name = new_data['last_name']
-
         # Si se proporciona un nuevo nickname, asigna el nuevo nickname
         if 'nickname' in new_data:
             user.nickname = new_data['nickname']
-
         # Si se proporciona un nuevo email, asigna el nuevo email
         if 'email' in new_data:
             user.email = new_data['email']
-
         # Si se proporciona una nueva contraseña, generar el hash y asigna la nueva contraseña
         if 'user_password' in new_data:
             user.user_password = bcrypt.generate_password_hash(new_data['user_password']).decode('utf-8')
-
         # Guardar los cambios en la base de datos
         db.session.commit()
 
@@ -121,16 +107,25 @@ class UserService:
 
         Returns:
             None
-
-        Raises:
-            ValueError: Si el usuario no es encontrado.
         """
         # Buscar al usuario por su ID
         user = UserService.get_user_by_user_id(user_id)
-        if not user:
-            # Si no se encuentra el usuario, lanzar una excepción
-            raise ValueError('User not found')
-
         # Eliminar el usuario de la base de datos
         db.session.delete(user)
         db.session.commit()
+
+    @staticmethod
+    def user_validation(user):
+        """
+        Validacion de existencia de usuario
+
+        Args:
+            user (object): Objeto con todos los atributos del usuario.
+        
+        Returns:
+            User: retorna el usuario.
+            ValueError: User not found, si el usuario no existe.
+        """
+        if not user:
+            raise ValueError('User not found')
+        return user
