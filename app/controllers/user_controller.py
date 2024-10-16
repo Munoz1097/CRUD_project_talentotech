@@ -6,7 +6,7 @@ from app.services.user_service import UserService
 user_ns = Namespace('users', description='Operaciones relacionadas con los usuarios')
 
 # Modelo de entrada de usuario
-user_model = user_ns.model('User', {
+entry_user_model = user_ns.model('EntryUser', {
     'first_name': fields.String(required=True, description='Nombre de usuario'),
     'last_name': fields.String(required=True, description='Apellido de usuario'),
     'nickname': fields.String(required=True, description='Apodo de usuario'),
@@ -15,7 +15,7 @@ user_model = user_ns.model('User', {
 })
 
 # Modelo de salida de usuario
-user_response_model = user_ns.model('UserResponse', {
+get_user_response_model = user_ns.model('GetResponse', {
     'user_id': fields.Integer(description='ID de usuario'),
     'first_name': fields.String(description='Nombre de usuario'),
     'last_name': fields.String(description='Apellido de usuario'),
@@ -40,11 +40,11 @@ class UserResource(Resource):
         """
         # Llama al servicio para obtener todos los usuarios
         users = UserService.get_all_users()  
-        # Usamos marshal para garantizar que la lista de usuarios se retorne conforme al modelo user_response_model.
-        return marshal(users, user_response_model), 200 # Retorna todos los datos de los usuarios    
+        # Usamos marshal para garantizar que la lista de usuarios se retorne conforme al modelo get_user_response_model.
+        return marshal(users, get_user_response_model), 200 # Retorna todos los datos de los usuarios    
     
     @user_ns.doc('create_user')
-    @user_ns.expect(user_model, validate=True)  # Decorador para esperar el modelo en la petición
+    @user_ns.expect(entry_user_model, validate=True)  # Decorador para esperar el modelo en la petición
     def post(self):
         """
         Crear un nuevo usuario
@@ -96,7 +96,7 @@ class UserDetailResource(Resource):
             # Llama al servicio para obtener el usuario asociado al ID
             user = UserService.get_user_by_user_id(user_id)            
             # Si el usuario se encuentra, aplicamos manualmente marshal para formatear la respuesta
-            return marshal(user, user_response_model), 200
+            return marshal(user, get_user_response_model), 200
         except ValueError as e:
             # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
             return make_response(jsonify({'message': str(e)}), 404)
@@ -119,13 +119,13 @@ class UserDetailResource(Resource):
             # Llama al servicio para eliminar al usuario
             UserService.delete_user(user_id)  
             # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
-            return jsonify({'message': 'User deleted successfully'})
+            return make_response(jsonify({'message': 'User deleted successfully'}), 200)
         except ValueError as e:
             # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
             return make_response(jsonify({'message': str(e)}), 404)
 
     @user_ns.doc('update_user')
-    @user_ns.expect(user_model, validate=False)
+    @user_ns.expect(entry_user_model, validate=False)
     def put(self, user_id):
         """
         Actualizar un usuario
@@ -152,7 +152,7 @@ class UserDetailResource(Resource):
             # Llama al servicio para actualizar el usuario
             UserService.update_user(user_id, new_data)  
             # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
-            return jsonify({'message': 'User updated successfully'})
+            return make_response(jsonify({'message': 'User updated successfully'}), 200)
         except ValueError as e:
             # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
             return make_response(jsonify({'message': str(e)}), 404)
