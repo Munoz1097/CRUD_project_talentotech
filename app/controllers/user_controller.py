@@ -36,7 +36,7 @@ class UserResource(Resource):
         Este método permite obtener una lista de todos los usuarios registrados en la base de datos.
 
         Responses:
-        - 200: Retorna una lista de apodos de usuarios.
+        - 200: Retorna todos los datos de todos los usuarios.
         """
         # Llama al servicio para obtener todos los usuarios
         users = UserService.get_all_users()  
@@ -75,7 +75,7 @@ class UserResource(Resource):
             # Se fabrica la respuesta con su respectivo código de respuesta
             return make_response(jsonify({'message': 'User created successfully', 'user': user.nickname}), 201)
         except ValueError as e:
-            # Si el nickname o el email ya existen se responde un mensaje de error con el 422
+            # Si el nickname o el email ya existen se responde un mensaje de error con el codigo 422
             return make_response(jsonify({'message': str(e)}), 422)   
 
 @user_ns.route('/<int:user_id>')

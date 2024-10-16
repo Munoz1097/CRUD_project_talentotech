@@ -1,5 +1,6 @@
 from app import db, bcrypt
 from app.models.user_model import User
+from app.utils.validations import Validations
 
 class UserService:
     @staticmethod
@@ -18,15 +19,10 @@ class UserService:
             User: El usuario creado.
             ValueError: Si el nickname o el email ya existen en la base de datos
         """
-        # Realizando consultas para validar si el nickname o el email ya existen en la BD
-        nickname_validation = User.query.filter_by(nickname=nickname).first()
-        email_validation = User.query.filter_by(email=email).first()
-        # Verificando que el el campo nickname no se repita
-        if nickname_validation:
-            raise ValueError('Nickname already exists. Please choose a different one.')        
-        # Verificando que el el campo email no se repita
-        if email_validation:
-            raise ValueError('Email is already registered. Please use a different email address.')
+        # Verificando que el campo nickname no se repita
+        Validations.check_field_existence(User.nickname, nickname, 'Nickname')
+        # Verificando que el campo email no se repita
+        Validations.check_field_existence(User.email, email, 'Email')
         # Generar un hash seguro de la contraseña con bcrypt
         hashed_password = bcrypt.generate_password_hash(user_password).decode('utf-8')
         # Crear un nuevo objeto User con la contraseña hasheada y todos los demás datos necesarios
@@ -62,7 +58,7 @@ class UserService:
         # Filtrar usuarios por su id de usuario (user_id)
         user = User.query.filter_by(user_id=user_id).first()
         # Se llama al servicio de validacion para corroborar que el usuario exista
-        user_validated = UserService.user_validation(user)
+        user_validated = Validations.check_if_exists(user, 'User')
         return user_validated
 
     @staticmethod
@@ -87,9 +83,11 @@ class UserService:
             user.last_name = new_data['last_name']
         # Si se proporciona un nuevo nickname, asigna el nuevo nickname
         if 'nickname' in new_data:
+            Validations.check_field_existence(User.nickname, new_data['nickname'], 'Nickname')
             user.nickname = new_data['nickname']
         # Si se proporciona un nuevo email, asigna el nuevo email
         if 'email' in new_data:
+            Validations.check_field_existence(User.email, new_data['email'], 'Email')
             user.email = new_data['email']
         # Si se proporciona una nueva contraseña, generar el hash y asigna la nueva contraseña
         if 'user_password' in new_data:
@@ -114,18 +112,4 @@ class UserService:
         db.session.delete(user)
         db.session.commit()
 
-    @staticmethod
-    def user_validation(user):
-        """
-        Validacion de existencia de usuario
-
-        Args:
-            user (object): Objeto con todos los atributos del usuario.
-        
-        Returns:
-            User: retorna el usuario.
-            ValueError: User not found, si el usuario no existe.
-        """
-        if not user:
-            raise ValueError('User not found')
-        return user
+    
