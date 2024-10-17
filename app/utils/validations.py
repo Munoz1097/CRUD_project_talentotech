@@ -35,7 +35,7 @@ class Validations():
             raise ValueError(f'{name} already exists. Please choose a different one.') 
         
     @staticmethod
-    def check_habit_pair_existence(attribute1, value1, attribute2, value2):
+    def check_data_pair_existence(attribute1, value1, attribute2, value2, name):
         """
         Validación de existencia de combinacion de combinacion entre nombre y jornanda de un hábito.
 
@@ -44,9 +44,10 @@ class Validations():
             value1: El primer valor esperado del atributo.
             attribute1: El segundo atributo a validar.
             value1: El segundo valor esperado del atributo.
+            name: Nombre de lo que se va a comparar para el mensaje de error
 
         Returns:
             boolean: si existe la combinacion de campos retorna True
         """
         if db.session.query(db.exists().where(db.and_( attribute1 == value1, attribute2 == value2))).scalar():
-            raise ValueError('A habit with the same name and time of day already exists. Please choose a different habit name or time slot.')
+            raise ValueError(f'This {name} already exists. Please choose a different {name}.')
