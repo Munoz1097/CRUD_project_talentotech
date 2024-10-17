@@ -3,93 +3,102 @@ from app.models.user_model import User
 from app.utils.validations import Validations
 
 class UserService:
+    """
+    Servicio para gestionar las operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
+    relacionadas con los usuarios en la base de datos.
+    """
+    
     @staticmethod
     def create_user(first_name, last_name, nickname, email, user_password):
         """
-        Crear un nuevo usuario en el sistema.
+        Crea un nuevo usuario en el sistema.
 
         Args:
             first_name (str): El nombre del usuario.
             last_name (str): El apellido del usuario.
-            nickname (str): Apodo del nuevo usuario.
-            email (str): Correo electrónico del nuevo usuario.
-            user_password (str): Contraseña en texto plano que será encriptada.
+            nickname (str): El apodo del nuevo usuario.
+            email (str): El correo electrónico del nuevo usuario.
+            user_password (str): La contraseña en texto plano que será encriptada.
 
         Returns:
-            User: El usuario creado.
-            ValueError: Si el nickname o el email ya existen en la base de datos
+            User: El usuario recién creado.
+
+        Raises:
+            ValueError: Si el 'nickname' o el 'email' ya existen en la base de datos.
         """
-        # Verificando que el campo nickname no se repita
+        # Verificando si el nickname ya existe
         Validations.check_field_existence(User.nickname, nickname, 'Nickname')
-        # Verificando que el campo email no se repita
+        # Verificando si el email ya existe
         Validations.check_field_existence(User.email, email, 'Email')
-        # Generar un hash seguro de la contraseña con bcrypt
+        # Generando un hash seguro de la contraseña con bcrypt
         hashed_password = bcrypt.generate_password_hash(user_password).decode('utf-8')
-        # Crear un nuevo objeto User con la contraseña hasheada y todos los demás datos necesarios
+        # Crear un nuevo usuario con la contraseña hasheada y los demás datos proporcionados
         user = User(first_name, last_name, nickname, email, user_password=hashed_password)
         # Añadir el nuevo usuario a la base de datos
         db.session.add(user)
         db.session.commit()
-        return user  # Retornar el usuario recién creado
+        return user
 
     @staticmethod
     def get_all_users():
         """
-        Obtener todos los usuarios de la base de datos.
+        Obtiene todos los usuarios registrados en la base de datos.
 
         Returns:
-            List[User]: Lista de todos los usuarios en la base de datos.
+            List[User]: Una lista con todos los usuarios registrados.
         """
-        # Recuperar todos los registros de la tabla User
+        # Retorna todos los registros de la tabla User
         return User.query.all()
 
     @staticmethod
     def get_user_by_user_id(user_id):
         """
-        Obtener un usuario por su id de usuario.
+        Obtiene un usuario por su ID de usuario.
 
         Args:
-            user_id (int): ID del usuario a buscar.
+            user_id (int): El ID del usuario que se desea obtener.
 
         Returns:
-            User: retorna el usuario.
-            ValueError: User not found, si el usuario no existe.
+            User: El usuario que coincide con el ID proporcionado.
+
+        Raises:
+            ValueError: Si el usuario no existe.
         """
-        # Filtrar usuarios por su id de usuario (user_id)
+        # Buscar al usuario por su ID
         user = User.query.filter_by(user_id=user_id).first()
-        # Se llama al servicio de validacion para corroborar que el usuario exista
+        # Validar si el usuario existe
         user_validated = Validations.check_if_exists(user, 'User')
         return user_validated
 
     @staticmethod
     def update_user(user_id, new_data):
         """
-        Actualizar los datos de un usuario existente.
+        Actualiza los datos de un usuario existente.
 
         Args:
-            user_id (int): ID del usuario a actualizar.
-            new_data (dict): Diccionario con los nuevos datos, como 'first_name', 'last_name', 'nickname', 'email', o 'user_password'.
+            user_id (int): El ID del usuario a actualizar.
+            new_data (dict): Un diccionario con los nuevos datos del usuario. 
+                            Puede incluir 'first_name', 'last_name', 'nickname', 'email' o 'user_password'.
 
         Returns:
             None
+
+        Raises:
+            ValueError: Si el 'nickname' o 'email' proporcionados ya existen en la base de datos.
         """
-        # Buscar al usuario por su id
+        # Buscar al usuario por su ID
         user = UserService.get_user_by_user_id(user_id)
-        # Si se proporciona un nuevo first_name, asigna el nuevo first_name
+        # Actualizar los datos según lo que se proporcione en 'new_data'
         if 'first_name' in new_data:
             user.first_name = new_data['first_name']
-        # Si se proporciona un nuevo last_name, asigna el nuevo last_name
         if 'last_name' in new_data:
             user.last_name = new_data['last_name']
-        # Si se proporciona un nuevo nickname, asigna el nuevo nickname
         if 'nickname' in new_data:
             Validations.check_field_existence(User.nickname, new_data['nickname'], 'Nickname')
             user.nickname = new_data['nickname']
-        # Si se proporciona un nuevo email, asigna el nuevo email
         if 'email' in new_data:
             Validations.check_field_existence(User.email, new_data['email'], 'Email')
             user.email = new_data['email']
-        # Si se proporciona una nueva contraseña, generar el hash y asigna la nueva contraseña
         if 'user_password' in new_data:
             user.user_password = bcrypt.generate_password_hash(new_data['user_password']).decode('utf-8')
         # Guardar los cambios en la base de datos
@@ -98,10 +107,10 @@ class UserService:
     @staticmethod
     def delete_user(user_id):
         """
-        Eliminar un usuario existente.
+        Elimina un usuario de la base de datos.
 
         Args:
-            user_id (int): ID del usuario a eliminar.
+            user_id (int): El ID del usuario a eliminar.
 
         Returns:
             None
@@ -111,5 +120,3 @@ class UserService:
         # Eliminar el usuario de la base de datos
         db.session.delete(user)
         db.session.commit()
-
-    

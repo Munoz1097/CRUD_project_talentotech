@@ -61,8 +61,12 @@ class HabitResource(Resource):
             # Crear el nuevo hábito
             new_habit = HabitService.create_habit(data['habit_name'], data['time_of_day'])  
             # Retornar el nuevo hábito creado
-            return make_response(jsonify([{'message': 'Habit created successfully'}, 
-                {'habit_name': new_habit.habit_name,'time_of_day': new_habit.time_of_day}]), 201) 
+            return make_response(jsonify([
+                {'message': 'Habit created successfully'}, 
+                {
+                    'habit_name': new_habit.habit_name,
+                    'time_of_day': new_habit.time_of_day
+                }]), 201) 
         except ValueError as e:
             return make_response(jsonify({'message': str(e)}), 422)   
         

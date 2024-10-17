@@ -14,7 +14,7 @@ entry_user_model = user_ns.model('EntryUser', {
     'user_password': fields.String(required=True, description='Contraseña'),
 })
 
-# Modelo de salida de usuario
+# Modelo de salida de usuario en el metodo get
 get_user_response_model = user_ns.model('GetResponse', {
     'user_id': fields.Integer(description='ID de usuario'),
     'first_name': fields.String(description='Nombre de usuario'),
@@ -71,9 +71,15 @@ class UserResource(Resource):
         data = request.get_json()
         try:
             # Se llama al metodo create_user de la clase UserService para crear un nuevo objeto User y se guarda en la variable user
-            user = UserService.create_user(data['first_name'], data['last_name'], data['nickname'], data['email'], data['user_password'])  
+            user = UserService.create_user(data['first_name'], data['last_name'], data['nickname'], data['email'], data['user_password'])
             # Se fabrica la respuesta con su respectivo código de respuesta
-            return make_response(jsonify({'message': 'User created successfully', 'user': user.nickname}), 201)
+            return make_response(jsonify([
+                {'message': 'User created successfully'}, 
+                {
+                    'user': f'{user.first_name} {user.last_name}',
+                    'nickname': user.nickname,
+                    'email': user.email
+                }]), 201)
         except ValueError as e:
             # Si el nickname o el email ya existen se responde un mensaje de error con el codigo 422
             return make_response(jsonify({'message': str(e)}), 422)   

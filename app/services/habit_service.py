@@ -4,63 +4,65 @@ from app.utils.validations import Validations
 
 class HabitService:
     """
-    Servicio para gestionar las operaciones CRUD (Crear, Leer, Actualizar, Eliminar) 
+    Servicio para gestionar las operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
     relacionadas con los hábitos en la base de datos.
     """
 
     @staticmethod
     def create_habit(habit_name, time_of_day):
         """
-        Crear un nuevo hábito.
+        Crea un nuevo hábito en la base de datos.
 
         Args:
             habit_name (str): El nombre del hábito.
-            time_of_day (str): El momento del día en el que se realiza el hábito (puede ser "mañana", "tarde" o "noche").
+            time_of_day (str): El momento del día en que se realiza el hábito. Puede ser "mañana", "tarde" o "noche".
 
         Returns:
             Habit: El objeto del hábito recién creado.
+
+        Raises:
+            ValueError: Si ya existe un hábito con el mismo nombre y momento del día.
         """
-        # Verificando que el nuevo habito que se va a crear no exista
-        Validations.check_data_pair_existence(Habit.habit_name, habit_name, Habit.time_of_day, time_of_day, 'habit')        
-        # if db.session.query(db.exists().where(db.and_(Habit.habit_name == habit_name, Habit.time_of_day == time_of_day))).scalar():
-        #     raise ValueError('A habit with the same name and time of day already exists. Please choose a different habit name or time slot.')   
-        # Crear un nuevo objeto Habit con sus datos
+        # Verificar que no exista un hábito con el mismo nombre y momento del día
+        Validations.check_data_pair_existence(Habit.habit_name, habit_name, Habit.time_of_day, time_of_day, 'habit')  
+        # Crear un nuevo objeto Habit con los datos proporcionados
         new_habit = Habit(habit_name, time_of_day)
         # Agregar el nuevo hábito a la base de datos y confirmar la transacción
         db.session.add(new_habit)
         db.session.commit()
-        # Retorna el hábito creado
+        # Retornar el hábito creado
         return new_habit
 
     @staticmethod
     def update_habit(habit_id, new_data):
         """
-        Actualizar un hábito existente.
+        Actualiza un hábito existente en la base de datos.
 
         Args:
             habit_id (int): El ID del hábito a actualizar.
-            new_data (dict): Un diccionario con los nuevos datos para actualizar el hábito.
+            new_data (dict): Un diccionario con los nuevos datos del hábito, como 'habit_name' y 'time_of_day'.
 
         Returns:
             Habit: El hábito actualizado.
 
         Raises:
-            ValueError: Si el hábito no se encuentra.
+            ValueError: Si el hábito no se encuentra o si ya existe un hábito con el mismo nombre y momento del día.
         """
-        # Buscar el hábito por su id
+        # Buscar el hábito por su ID
         habit = HabitService.get_habit_by_id(habit_id)
-        # Validamos si existe la combinacion de nombre de habito y jornada
+        # Validar que no exista otra combinación de nombre y momento del día
         Validations.check_data_pair_existence(Habit.habit_name, new_data['habit_name'], Habit.time_of_day, new_data['time_of_day'], 'habit')
-        # Actualizar el nombre y la jornada del hábito
+        # Actualizar el nombre y el momento del día del hábito
         habit.habit_name = new_data['habit_name']
         habit.time_of_day = new_data['time_of_day']
         # Guardar los cambios en la base de datos
         db.session.commit()
+        return habit
 
     @staticmethod
     def delete_habit(habit_id):
         """
-        Eliminar un hábito existente.
+        Elimina un hábito existente de la base de datos.
 
         Args:
             habit_id (int): El ID del hábito a eliminar.
@@ -68,10 +70,10 @@ class HabitService:
         Raises:
             ValueError: Si el hábito no se encuentra.
         """
+        # Obtener el hábito por su ID
         habit = HabitService.get_habit_by_id(habit_id)
-
+        # Verificar que el hábito exista
         Validations.check_if_exists(habit, 'Habit')
-
         # Eliminar el hábito de la base de datos y confirmar la transacción
         db.session.delete(habit)
         db.session.commit()
@@ -79,27 +81,29 @@ class HabitService:
     @staticmethod
     def get_all_habits():
         """
-        Obtener todos los hábitos.
+        Obtiene todos los hábitos almacenados en la base de datos.
 
         Returns:
-            List[Habit]: Una lista de todos los hábitos almacenados en la base de datos.
+            List[Habit]: Una lista con todos los hábitos registrados.
         """
         return Habit.query.all()
     
     @staticmethod
     def get_habit_by_id(habit_id):
         """
-        Obtener un hábito por su id.
+        Obtiene un hábito por su ID.
 
         Args:
-            user_id (int): ID del usuario a buscar.
+            habit_id (int): El ID del hábito a buscar.
 
         Returns:
-            Habit: retorna el hábito.
-            ValueError: User not found, si el hábito no existe.
+            Habit: El hábito que coincide con el ID proporcionado.
+
+        Raises:
+            ValueError: Si el hábito no se encuentra.
         """
-        # Filtrar hábitos por su id (habit_id)
+        # Buscar el hábito por su ID
         habit = Habit.query.filter_by(habit_id=habit_id).first()
-        # Se llama al servicio de validacion para corroborar que el hábito exista
+        # Validar que el hábito exista
         habit_validated = Validations.check_if_exists(habit, 'Habit')
         return habit_validated
