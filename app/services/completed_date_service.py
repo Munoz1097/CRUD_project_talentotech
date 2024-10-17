@@ -51,8 +51,8 @@ class CompletedDateService:
             ValueError: Si la fecha de completación no existe.
         """
         date = CompletedDate.query.filter_by(completed_date_id=date_id).first()
-        date_validated = Validations.check_if_exists(date, 'CompletedDate')
-        return date_validated
+        validated_date = Validations.check_if_exists(date, 'Date')
+        return validated_date
     
     @staticmethod
     def get_all_dates_by_assignment_id(assignment_id):
@@ -65,7 +65,9 @@ class CompletedDateService:
         Returns:
             List[CompletedDate]: Lista de fechas de completación asociadas a la asignación.
         """
-        return CompletedDate.query.filter_by(fk_assignment_id=assignment_id).all()
+        dates = CompletedDate.query.filter_by(fk_assignment_id=assignment_id).all()
+        validated_date = Validations.check_if_exists(dates, 'Dates')
+        return validated_date
     
     @staticmethod
     def get_all_dates():
@@ -76,3 +78,24 @@ class CompletedDateService:
             List[CompletedDate]: Lista de todas las fechas de completación en la base de datos.
         """
         return CompletedDate.query.all()
+    
+    @staticmethod
+    def delete_date(completed_date_id):
+        """
+        Eliminar una fecha de completación existente de la base de datos.
+
+        Args:
+            completed_date_id (int): ID de la fecha de completación a eliminar.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: Si la fecha de completación no se encuentra.
+        """
+        # Obtener la fecha de completación por su ID
+        date = CompletedDateService.get_date_by_date_id(completed_date_id)
+        
+        # Eliminar la fecha de completación de la base de datos
+        db.session.delete(date)
+        db.session.commit()

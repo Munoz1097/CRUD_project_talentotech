@@ -1,5 +1,7 @@
 from app import db
 from app.models.assignment_model import Assignment
+from app.models.habit_model import Habit
+from app.models.user_model import User
 from app.utils.validations import Validations
 
 class AssignmentService:
@@ -23,6 +25,10 @@ class AssignmentService:
         Raises:
             ValueError: Si ya existe una asignación con el mismo usuario y hábito.
         """
+        # Verificar que la el id del usuario y del hábitos existan en sus respectivas tablas
+        Validations.check_fk_existence(User.user_id, fk_user_id, 'users')
+        Validations.check_fk_existence(Habit.habit_id, fk_habit_id, 'habits')
+
         # Verificar que no exista una asignación duplicada para el mismo usuario y hábito
         Validations.check_data_pair_existence(Assignment.fk_user_id, fk_user_id, Assignment.fk_habit_id, fk_habit_id, 'assignment')
 

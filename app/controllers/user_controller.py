@@ -6,7 +6,7 @@ from app.services.user_service import UserService
 user_ns = Namespace('users', description='Operaciones relacionadas con los usuarios')
 
 # Modelo de entrada de usuario
-entry_user_model = user_ns.model('EntryUser', {
+entry_user_model = user_ns.model('User', {
     'first_name': fields.String(required=True, description='Nombre de usuario'),
     'last_name': fields.String(required=True, description='Apellido de usuario'),
     'nickname': fields.String(required=True, description='Apodo de usuario'),
