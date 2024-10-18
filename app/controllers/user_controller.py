@@ -161,4 +161,5 @@ class UserDetailResource(Resource):
             return make_response(jsonify({'message': 'User updated successfully'}), 200)
         except ValueError as e:
             # Si el usuario no es encontrado, devolvemos un mensaje de error con el código 404
-            return make_response(jsonify({'message': str(e)}), 404)
+            return make_response(jsonify({'message': str(e)}), 404)     
+

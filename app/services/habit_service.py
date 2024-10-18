@@ -23,6 +23,7 @@ class HabitService:
         Raises:
             ValueError: Si ya existe un hábito con el mismo nombre y momento del día.
         """
+        Validations.Check_data_time_of_day(time_of_day)
         # Verificar que no exista un hábito con el mismo nombre y momento del día
         Validations.check_data_pair_existence(Habit.habit_name, habit_name, Habit.time_of_day, time_of_day, 'habit')  
         # Crear un nuevo objeto Habit con los datos proporcionados
@@ -34,7 +35,7 @@ class HabitService:
         return new_habit
 
     @staticmethod
-    def update_habit(habit_id, new_data):
+    def update_habit(habit_id, habit_name, time_of_day):
         """
         Actualiza un hábito existente en la base de datos.
 
@@ -48,13 +49,14 @@ class HabitService:
         Raises:
             ValueError: Si el hábito no se encuentra o si ya existe un hábito con el mismo nombre y momento del día.
         """
+        Validations.Check_data_time_of_day(time_of_day)
+        # Validar que no exista otra combinación de nombre y momento del día
+        Validations.check_data_pair_existence(Habit.habit_name, habit_name, Habit.time_of_day, time_of_day, 'habit')
         # Buscar el hábito por su ID
         habit = HabitService.get_habit_by_id(habit_id)
-        # Validar que no exista otra combinación de nombre y momento del día
-        Validations.check_data_pair_existence(Habit.habit_name, new_data['habit_name'], Habit.time_of_day, new_data['time_of_day'], 'habit')
         # Actualizar el nombre y el momento del día del hábito
-        habit.habit_name = new_data['habit_name']
-        habit.time_of_day = new_data['time_of_day']
+        habit.habit_name = habit_name
+        habit.time_of_day = time_of_day
         # Guardar los cambios en la base de datos
         db.session.commit()
         return habit
@@ -72,8 +74,6 @@ class HabitService:
         """
         # Obtener el hábito por su ID
         habit = HabitService.get_habit_by_id(habit_id)
-        # Verificar que el hábito exista
-        Validations.check_if_exists(habit, 'Habit')
         # Eliminar el hábito de la base de datos y confirmar la transacción
         db.session.delete(habit)
         db.session.commit()

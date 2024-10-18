@@ -1,6 +1,7 @@
 from flask import request, jsonify, make_response
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services.habit_service import HabitService
+from app.utils.exceptions import *
 
 # Crear un espacio de nombres (namespace) para los hábitos
 habit_ns = Namespace('habits', description='Operaciones relacionadas con los hábitos')
@@ -67,8 +68,10 @@ class HabitResource(Resource):
                     'habit_name': new_habit.habit_name,
                     'time_of_day': new_habit.time_of_day
                 }]), 201) 
-        except ValueError as e:
-            return make_response(jsonify({'message': str(e)}), 422)   
+        except DuplicateValueError as e:
+            return make_response(jsonify({'message': str(e)}), 422)  
+        except InvalidDataError as e:
+            return make_response(jsonify({'message': str(e)}), 422) 
         
 
 @habit_ns.route('/<int:habit_id>')
@@ -91,7 +94,7 @@ class HabitDetailResource(Resource):
             habit = HabitService.get_habit_by_id(habit_id)
             # Retorna todos los datos del hábito en el formato estipulado
             return marshal(habit, get_habit_response_model), 200
-        except ValueError as e:
+        except NotFoundError as e:
             return make_response(jsonify({'message': str(e)}), 404) 
 
     @habit_ns.doc('update_habit')
@@ -117,12 +120,14 @@ class HabitDetailResource(Resource):
         new_data = request.get_json()  
         try:
             # Actualizar el hábito con los nuevos datos
-            HabitService.update_habit(habit_id, new_data)  
+            HabitService.update_habit(habit_id, new_data['habit_name'], new_data['time_of_day'])  
             # Usamos jsonify para enviar un mensaje de éxito en formato JSON.
             return make_response(jsonify({'message': 'Habit updated successfully'}), 200)
-        except ValueError as e:
+        except InvalidDataError as e:
+            return make_response(jsonify({'message': str(e)}), 422) 
+        except NotFoundError as e:
             # Si el hábito no es encontrado, devolvemos un mensaje de error con el código 404
-            return make_response(jsonify({'message': str(e)}), 404)            
+            return make_response(jsonify({'message': str(e)}), 404)  
 
     @habit_ns.doc('delete_habit')
     def delete(self, habit_id):
@@ -142,6 +147,6 @@ class HabitDetailResource(Resource):
             # Llama al servicio para eliminar el hábito
             HabitService.delete_habit(habit_id)  
             return make_response(jsonify({'message': 'Habit deleted successfully'}), 200)
-        except ValueError as e:
+        except NotFoundError as e:
             # Si el hábito no es encontrado, devolvemos un mensaje de error con el código 404
             return make_response(jsonify({'message': str(e)}), 404) 

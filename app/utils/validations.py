@@ -1,4 +1,5 @@
 from app import db
+from .exceptions import *
 
 class Validations():
     @staticmethod
@@ -17,7 +18,7 @@ class Validations():
             ValueError: Si el objeto no existe, lanza un error con el mensaje "{type_obj} not found".
         """
         if not obj:
-            raise ValueError(f'{type_obj} not found')
+            raise NotFoundError(f'{type_obj} not found')
         return obj
 
     @staticmethod
@@ -37,7 +38,7 @@ class Validations():
             ValueError: Si el valor ya existe, lanza un error con el mensaje "{name} already exists".
         """
         if db.session.query(db.exists().where(attribute == value)).scalar():
-            raise ValueError(f'{name} already exists. Please choose a different one.')
+            raise DuplicateValueError(f'{name} already exists. Please choose a different one.')
 
     @staticmethod
     def check_fk_existence(attribute, value, tablename):
@@ -57,7 +58,7 @@ class Validations():
                         "The primary key {value} does not exist in the {tablename} table."
         """
         if not db.session.query(db.exists().where(attribute == value)).scalar():
-            raise ValueError(f'The primary key {value} does not exist in the {tablename} table.')
+            raise NotFoundError(f'The primary key {value} does not exist in the {tablename} table.')
 
     @staticmethod
     def check_data_pair_existence(attribute1, value1, attribute2, value2, name):
@@ -79,4 +80,10 @@ class Validations():
                         "{name} already exists. Please choose a different {name}."
         """
         if db.session.query(db.exists().where(db.and_(attribute1 == value1, attribute2 == value2))).scalar():
-            raise ValueError(f'This {name} already exists. Please choose a different {name}.')
+            raise DuplicateValueError(f'This {name} already exists. Please choose a different {name}.')
+        
+    @staticmethod
+    def Check_data_time_of_day(data):
+        options=['mañana','tarde','noche']
+        if data not in options:
+            raise InvalidDataError('The value entered in the time_of_day field is incorrect. It must be [mañana, tarde, noche].')
